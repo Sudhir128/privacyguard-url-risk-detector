@@ -1,0 +1,21 @@
+data leak chekcer:
+
+creating app , modules , pycache_ files by using python commands:
+creating a directory->folder->creating files->making the created files as modules.
+python -m modules.bh (creating a file as a module . here bh is filename(bh.py)).
+
+Extracting browser history:bh.py
+using packages - browser_history
+fetching a browser history by creating a browser instance.(here edge is used).
+	edge=Edge()
+making the extracted history as a dataframe using 'datetime','url','title'.
+
+
+analysing url: url_analyser.py
+getting urls from bh.py:
+	urls=data['url'].tolist()
+dowload tracker domains from external open source.(here used duckduckgo).
+the downloaded tracker domains consist of [
+create a tracker_set and load the domain from tracker domains
+
+
