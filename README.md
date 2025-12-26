@@ -22,37 +22,15 @@ Model Persistence: Joblib
 
 ---
 
-# project architecture
+# Project Architecture 
+- The PrivacyGuard system follows a modular, layered architecture designed for scalability, maintainability, and real-time risk assessment.
+- At the API layer, a FastAPI backend acts as the entry point. It receives URLs from clients, validates input, and returns structured risk predictions with confidence scores.
+- The core analysis layer handles URL parsing and inspection. It breaks down URLs into domains and query parameters, identifies known trackers, and applies rule-based logic to support risk interpretation.
+- The feature engineering layer transforms raw URL components into machine-learning–ready features, such as tracker presence, parameter counts, and risk scores.
+- The machine learning layer uses a trained Random Forest classifier to predict the privacy risk level of a URL and estimate confidence probabilities.
+- The database layer uses PostgreSQL to persist extracted features and prediction results, enabling auditing, analytics, and future model improvements.
+- Supporting layers include tracker intelligence data, batch processing scripts, and automated tests to ensure system reliability.
 
-privacyguard-url-risk-detector/
-│
-├── app/
-│   ├── api/
-│   │   └── api.py              # FastAPI endpoints
-│   │
-│   ├── core/
-│   │   ├── url_analyser.py
-│   │   ├── risk_engine.py
-│   │   └── parameter_risk_engine.py
-│   │
-│   ├── features/
-│   │   └── build_features.py   # Feature extraction logic
-│   │
-│   ├── db/
-│   │   └── db.py               # Database connection & queries
-│   │
-│   ├── ml/
-│   │   └── train_model.py      # Model training pipeline
-│   │
-│   ├── models/
-│   │   └── rf_url_risk_model.pkl
-│   │
-│   └── main.py                 # Entry point for feature storage
-│
-├── .gitignore
-├── LICENSE
-├── README.md
-└── requirements.txt
 
 ---
 
