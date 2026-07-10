@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PrivacyGuard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-icon">🛡️</span>
+      <span class="brand-name">PrivacyGuard</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="scanner" role="tab" aria-selected="true">Scanner</button>
+      <button class="tab-btn" data-tab="dashboard" role="tab" aria-selected="false">Dashboard</button>
+    </nav>
+    <div class="status-indicator" id="statusIndicator" title="Checking API status…">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Connecting…</span>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+
+  <!-- ===================== SCANNER TAB ===================== -->
+  <section class="tab-panel active" id="tab-scanner">
+    <div class="panel-header">
+      <h1>URL Risk &amp; Phishing Scanner</h1>
+      <p class="subtitle">Paste any URL to check for tracking parameters, credential leaks, and phishing patterns.</p>
+    </div>
+
+    <div class="glass-card scan-card">
+      <form id="scanForm" class="scan-form">
+        <div class="input-glow-wrap">
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="https://example.com/path?utm_source=..."
+            autocomplete="off"
+            spellcheck="false"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary" id="scanBtn">
+          <span class="btn-label">Scan URL</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
+      </form>
+    </div>
+
+    <div id="scanResult" class="scan-result-wrap" hidden></div>
+  </section>
+
+  <!-- ===================== DASHBOARD TAB ===================== -->
+  <section class="tab-panel" id="tab-dashboard">
+    <div class="panel-header">
+      <h1>Privacy Dashboard</h1>
+      <p class="subtitle">An overview of everything PrivacyGuard has scanned.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="glass-card stat-tile">
+        <span class="stat-label">Total Scans</span>
+        <span class="stat-value" id="statTotalScans">–</span>
+      </div>
+      <div class="glass-card stat-tile">
+        <span class="stat-label">Privacy Score</span>
+        <span class="stat-value" id="statPrivacyScore">–</span>
+      </div>
+      <div class="glass-card stat-tile">
+        <span class="stat-label">Trackers Found</span>
+        <span class="stat-value" id="statTrackers">–</span>
+      </div>
+      <div class="glass-card stat-tile stat-critical stat-clickable" id="statCriticalTile" role="button" tabindex="0">
+        <span class="stat-label">Critical Alerts</span>
+        <span class="stat-value" id="statCritical">–</span>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="glass-card chart-card">
+        <div class="card-title-row">
+          <h2>Risk Distribution</h2>
+          <button class="link-btn" id="toggleDistTable">View as table</button>
+        </div>
+        <div class="donut-wrap">
+          <canvas id="riskDonut" width="220" height="220"></canvas>
+          <ul class="donut-legend" id="donutLegend"></ul>
+        </div>
+        <table class="a11y-table" id="distTable" hidden>
+          <thead><tr><th>Risk level</th><th>Scans</th></tr></thead>
+          <tbody id="distTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="glass-card chart-card">
+        <div class="card-title-row">
+          <h2>Top Tracker Companies</h2>
+        </div>
+        <canvas id="trackerBar" height="220"></canvas>
+      </div>
+    </div>
+
+    <div class="glass-card browser-scan-card">
+      <div class="card-title-row">
+        <h2>Scan Browser History</h2>
+      </div>
+      <p class="subtitle">Reads your local browser history and scans every visited URL for tracking &amp; risk signals.</p>
+      <div class="browser-scan-controls">
+        <select id="browserSelect">
+          <option value="">Auto-detect all browsers</option>
+          <option value="chrome">Chrome</option>
+          <option value="edge">Edge</option>
+          <option value="firefox">Firefox</option>
+          <option value="brave">Brave</option>
+        </select>
+        <button class="btn btn-primary" id="browserScanBtn">
+          <span class="btn-label">Scan Browser History</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
+        <button class="btn btn-danger" id="browserScanStopBtn" hidden>
+          <span class="btn-label">Stop Scan</span>
+        </button>
+      </div>
+      <div class="progress-bar-wrap" id="browserScanProgress" hidden>
+        <div class="progress-bar-indeterminate"></div>
+      </div>
+      <p id="browserScanResultText" class="scan-note"></p>
+    </div>
+
+    <div class="glass-card history-card">
+      <div class="card-title-row">
+        <h2>Recent Scans</h2>
+        <div style="display: flex; gap: 8px;">
+          <button class="link-btn" id="seeAllHistoryBtn">See All</button>
+          <button class="link-btn" id="refreshHistory">Refresh</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="history-table">
+          <thead>
+            <tr><th>URL</th><th>Risk</th><th>Score</th><th>Tracker</th><th>When</th></tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr><td colspan="5" class="empty-row">No scans yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  </section>
+
+  <!-- ===================== CRITICAL ALERTS MODAL ===================== -->
+  <div class="modal-overlay" id="criticalModal" hidden>
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h2>🚨 Critical Alerts</h2>
+        <button class="link-btn close-modal-btn" id="closeCriticalModal">Close</button>
+      </div>
+      <div class="table-scroll">
+        <table class="history-table">
+          <thead>
+            <tr><th>URL</th><th>Score</th><th>Phishing</th><th>When</th></tr>
+          </thead>
+          <tbody id="criticalModalBody">
+            <tr><td colspan="4" class="empty-row">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

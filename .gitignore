@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 
+# PrivacyGuard
+.env
+*.pkl
+*.db
+privacyguard.log
+models/
+data/
+trackers/
+
+
