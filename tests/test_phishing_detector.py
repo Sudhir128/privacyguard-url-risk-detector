@@ -19,6 +19,12 @@ def test_check_brand_similarity_flags_typosquat():
     assert distance <= 2
 
 
+def test_check_brand_similarity_flags_direct_typosquat_root():
+    brand, distance = check_brand_similarity("paypa1.xyz")
+    assert brand == "paypal"
+    assert distance <= 2
+
+
 def test_check_brand_similarity_exact_match_is_not_flagged():
     brand, _ = check_brand_similarity("paypal.com")
     assert brand is None

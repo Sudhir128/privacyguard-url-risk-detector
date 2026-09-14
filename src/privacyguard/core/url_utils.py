@@ -11,13 +11,20 @@ COMMON_TLDS = {
 
 def domain_parser(url: str) -> str | None:
     try:
-        parsed_url = urlparse(url)
+        if not url:
+            return None
+        url_str = str(url).strip()
+        if "://" not in url_str and not url_str.startswith("//"):
+            url_str = "//" + url_str
+        parsed_url = urlparse(url_str)
         domain = parsed_url.netloc.lower()
         if "@" in domain:
             domain = domain.rsplit("@", 1)[-1]
         if ":" in domain:
             domain = domain.split(":", 1)[0]
-        return domain.replace("www.", "", 1)
+        if domain.startswith("www."):
+            domain = domain[4:]
+        return domain if domain else None
     except Exception:
         return None
 

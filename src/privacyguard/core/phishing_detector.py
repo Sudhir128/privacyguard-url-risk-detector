@@ -75,10 +75,12 @@ def check_brand_similarity(domain: str) -> tuple[str | None, int]:
 
     best_brand, best_distance = None, 999
     for token in tokens:
-        if token == registrable_root:
-            continue  # the domain's real registrable label is never "impersonation"
         normalized = token.translate(HOMOGLYPH_MAP)
         for brand in KNOWN_BRANDS:
+            # If the domain's own registrable root literally matches the brand itself,
+            # that is the legitimate brand domain (e.g. paypal.com, login.paypal.com).
+            if token == registrable_root and token == brand:
+                continue
             distance = min(levenshtein(token, brand), levenshtein(normalized, brand))
             if distance < best_distance:
                 best_brand, best_distance = brand, distance

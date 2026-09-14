@@ -13,10 +13,13 @@ from privacyguard.core.url_utils import (
 def test_domain_parser_strips_www_and_scheme():
     assert domain_parser("https://www.example.com/path") == "example.com"
     assert domain_parser("http://example.com") == "example.com"
+    assert domain_parser("https://rawww.org") == "rawww.org"
+    assert domain_parser("example.com/path") == "example.com"
 
 
 def test_domain_parser_invalid_url_returns_none():
     assert domain_parser(None) is None
+    assert domain_parser("") is None
 
 
 def test_extract_domain_matches_domain_parser():

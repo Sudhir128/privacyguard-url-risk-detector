@@ -100,6 +100,8 @@ def scan_browser(request: BrowserScanRequest):
 
 @router.get("/history", response_model=HistoryResponse)
 def history(limit: int = 50, offset: int = 0, risk_label: str | None = None):
+    if risk_label:
+        risk_label = risk_label.upper()
     items = get_history(limit=limit, offset=offset, risk_label=risk_label)
     return HistoryResponse(items=items, limit=limit, offset=offset)
 

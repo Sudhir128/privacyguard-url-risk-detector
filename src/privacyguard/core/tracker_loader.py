@@ -25,15 +25,34 @@ def _discover_domains_dir(base_path: Path) -> Path | None:
     return None
 
 
+FALLBACK_TRACKER_DOMAINS = frozenset({
+    "doubleclick.net", "google-analytics.com", "googletagmanager.com",
+    "googleadservices.com", "googlesyndication.com", "adservice.google.com",
+    "facebook.net", "connect.facebook.net", "scorecardresearch.com",
+    "adnxs.com", "criteo.com", "criteo.net", "rubiconproject.com",
+    "pubmatic.com", "amazon-adsystem.com", "hotjar.com", "mixpanel.com",
+    "segment.io", "outbrain.com", "taboola.com", "chartbeat.com",
+    "quantserve.com", "moatads.com", "advertising.com", "casalemedia.com",
+    "openx.net", "smartadserver.com", "yieldmo.com", "appsflyer.com",
+    "branch.io", "adjust.com", "amplitude.com", "newrelic.com",
+    "clarity.ms", "optimizely.com", "tiqcdn.com", "adroll.com",
+    "bizible.com", "mouseflow.com", "fullstory.com", "yandex.ru",
+    "zemanta.com", "teads.tv", "bidswitch.net", "indexww.com",
+    "media6degrees.com", "mathtag.com", "crwdcntrl.net", "rlcdn.com",
+    "bluekai.com", "krxd.net", "agkn.com", "demdex.net", "omtrdc.net",
+    "app-measurement.com", "bugsnag.com", "sentry.io",
+})
+
+
 def _load_tracker_domains(base_path: Path, prevalence_threshold: float) -> set[str]:
     domains_dir = _discover_domains_dir(base_path)
     if domains_dir is None:
-        logger.warning(
-            "Tracker data not found at %s — tracker detection will be disabled "
-            "until data is available.",
+        logger.info(
+            "Tracker data not found at %s — using %d built-in fallback tracker domains.",
             base_path,
+            len(FALLBACK_TRACKER_DOMAINS),
         )
-        return set()
+        return set(FALLBACK_TRACKER_DOMAINS)
 
     # Tracker Radar ships one file per (domain, region) pair, so the same
     # domain can appear many times with different measured prevalence. Keep
@@ -63,7 +82,7 @@ def _load_tracker_domains(base_path: Path, prevalence_threshold: float) -> set[s
         "Loaded %d tracker domains (of %d seen) from %s at prevalence >= %s",
         len(tracker_set), len(best_prevalence), domains_dir, prevalence_threshold,
     )
-    return tracker_set
+    return tracker_set if tracker_set else set(FALLBACK_TRACKER_DOMAINS)
 
 
 @lru_cache(maxsize=1)

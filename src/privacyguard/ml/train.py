@@ -74,7 +74,11 @@ def _generate_clean_urls(rng: random.Random, n: int) -> list[str]:
 def _generate_tracker_urls(rng: random.Random, n: int) -> list[str]:
     tracker_domains = list(get_tracker_domains())
     if not tracker_domains:
-        return []
+        tracker_domains = [
+            "doubleclick.net", "google-analytics.com", "adnxs.com", "criteo.com",
+            "scorecardresearch.com", "amazon-adsystem.com", "rubiconproject.com",
+            "pubmatic.com", "taboola.com", "outbrain.com",
+        ]
 
     scheme_choices = ["https://", "https://", "http://"]  # mostly https, some plaintext
     param_sets = [
@@ -87,6 +91,19 @@ def _generate_tracker_urls(rng: random.Random, n: int) -> list[str]:
         scheme = rng.choice(scheme_choices)
         params = rng.choice(param_sets)
         urls.append(f"{scheme}{domain}/collect{params}")
+    return urls
+
+
+def _generate_medium_risk_urls(rng: random.Random, n: int) -> list[str]:
+    tracker_domains = list(get_tracker_domains()) or [
+        "doubleclick.net", "google-analytics.com", "criteo.com"
+    ]
+    urls = []
+    for _ in range(n):
+        domain = rng.choice(tracker_domains)
+        path = rng.choice(["/login", "/verify", "/auth", "/checkout"])
+        param = rng.choice(["q=test&ref=partner", "source=ad&sid=12345", "token=sample_non_sensitive"])
+        urls.append(f"http://{domain}{path}?{param}")
     return urls
 
 
@@ -130,6 +147,7 @@ def generate_training_urls(seed: int = 42, per_category: int = 150) -> list[str]
     urls = (
         _generate_clean_urls(rng, per_category)
         + _generate_tracker_urls(rng, per_category)
+        + _generate_medium_risk_urls(rng, per_category // 2)
         + _generate_credential_leak_urls(rng, per_category)
         + _generate_phishing_urls(rng, per_category)
     )
@@ -162,8 +180,11 @@ def train_model(output_path=None) -> dict:
     X = df[FEATURE_COLUMNS]
     y = df["label"].map(LABEL_MAP)
 
+    min_count = y.value_counts().min()
+    stratify = y if min_count >= 2 else None
+
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.25, random_state=42, stratify=y
+        X, y, test_size=0.25, random_state=42, stratify=stratify
     )
 
     rf = RandomForestClassifier(
