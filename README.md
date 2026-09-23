@@ -45,9 +45,21 @@ pip install -e ".[dev]"
 copy .env.example .env           # then edit as needed
 ```
 
-SQLite is the default database — no extra configuration needed. To use
-PostgreSQL instead, install the extra and set `DB_TYPE=postgres` in `.env`:
+SQLite is the default database — no extra configuration needed. You can also use PostgreSQL or Supabase:
 
+### Supabase Setup (Recommended Cloud Database)
+To switch to Supabase:
+1. Set `DB_TYPE=supabase` in `.env`
+2. Configure your credentials in `.env`:
+   ```env
+   DB_TYPE=supabase
+   SUPABASE_URL=https://avbgpvggtcsrelcsqeux.supabase.co
+   SUPABASE_KEY=eyJhbGciOiJIUzI1...
+   ```
+3. Run `supabase_schema.sql` in your [Supabase SQL Editor](https://supabase.com/dashboard/project/avbgpvggtcsrelcsqeux/sql) to set up tables and Row Level Security policies.
+
+### PostgreSQL Setup
+Set `DB_TYPE=postgres` in `.env` and install the extra:
 ```bash
 pip install -e ".[postgres]"
 ```

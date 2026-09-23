@@ -98,8 +98,42 @@ CREATE TABLE IF NOT EXISTS url_scans (
 """
 
 
+_supabase_client = None
+
+
+def get_supabase_client():
+    """Returns a singleton Supabase client instance."""
+    global _supabase_client
+    settings = get_settings()
+    url = settings.supabase_url
+    key = settings.supabase_key or settings.supabase_publishable_key
+    if not url or not key:
+        raise ValueError(
+            "SUPABASE_URL and SUPABASE_KEY must be configured in .env when DB_TYPE=supabase"
+        )
+    if _supabase_client is None:
+        from supabase import create_client
+
+        _supabase_client = create_client(url, key)
+    return _supabase_client
+
+
 def init_schema() -> None:
     settings = get_settings()
+    if settings.db_type == "supabase":
+        client = get_supabase_client()
+        try:
+            client.table("scan_sessions").select("id").limit(1).execute()
+            logger.info("Supabase database ready at %s", settings.supabase_url)
+        except Exception as err:
+            logger.warning(
+                "Connected to Supabase (%s), but schema check returned: %s. "
+                "Please run 'supabase_schema.sql' in Supabase SQL Editor to create tables if needed.",
+                settings.supabase_url,
+                err,
+            )
+        return
+
     schema = SCHEMA_SQLITE if settings.db_type == "sqlite" else SCHEMA_POSTGRES
 
     with get_connection() as conn:

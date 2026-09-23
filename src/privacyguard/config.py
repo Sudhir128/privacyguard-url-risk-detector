@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     postgres_user: str = "privacyguard"
     postgres_password: str = ""
 
+    supabase_url: str = ""
+    supabase_key: str = ""
+    supabase_publishable_key: str = ""
+
     model_path: str = "./models/"
     tracker_data_path: str = "./trackers/"
     # Tracker Radar measures third-party embed prevalence across a large site
